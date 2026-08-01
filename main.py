@@ -3,29 +3,29 @@ import os
 import time
 import logging
 import pandas as pd
+import requests
 
 logger = logging.getLogger(__name__)
 
 
 def get_ice_servers():
-    """Fetch TURN credentials from Twilio if configured, else fall back
+    """Fetch TURN credentials from Metered.ca if configured, else fall back
     to a public STUN server (won't work reliably on Streamlit Cloud)."""
     try:
-        account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
-        auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
+        api_key = st.secrets["METERED_API_KEY"]
+        app_name = st.secrets["METERED_APP_NAME"]
     except (KeyError, FileNotFoundError):
         logger.warning(
-            "Twilio credentials not found in st.secrets. "
+            "Metered credentials not found in st.secrets. "
             "Falling back to a public STUN server only — video connection "
             "may fail on Streamlit Cloud or other restrictive networks."
         )
         return [{"urls": ["stun:stun.l.google.com:19302"]}]
 
-    from twilio.rest import Client
-
-    client = Client(account_sid, auth_token)
-    token = client.tokens.create()
-    return token.ice_servers
+    url = f"https://{app_name}.metered.live/api/v1/turn/credentials?apiKey={api_key}"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    return response.json()
 from services.auth.login_wall import render_login_wall
 from services.state.session_defaults import initial_session_defaults
 from services.config.workout_config import EXERCISE_OPTIONS
