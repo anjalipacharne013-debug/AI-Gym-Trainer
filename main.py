@@ -1,31 +1,7 @@
 import streamlit as st
 import os
 import time
-import logging
 import pandas as pd
-import requests
-
-logger = logging.getLogger(__name__)
-
-
-def get_ice_servers():
-    """Fetch TURN credentials from Metered.ca if configured, else fall back
-    to a public STUN server (won't work reliably on Streamlit Cloud)."""
-    try:
-        api_key = st.secrets["METERED_API_KEY"]
-        app_name = st.secrets["METERED_APP_NAME"]
-    except (KeyError, FileNotFoundError):
-        logger.warning(
-            "Metered credentials not found in st.secrets. "
-            "Falling back to a public STUN server only — video connection "
-            "may fail on Streamlit Cloud or other restrictive networks."
-        )
-        return [{"urls": ["stun:stun.l.google.com:19302"]}]
-
-    url = f"https://{app_name}.metered.live/api/v1/turn/credentials?secretKey={api_key}"
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    return response.json()
 from services.auth.login_wall import render_login_wall
 from services.state.session_defaults import initial_session_defaults
 from services.config.workout_config import EXERCISE_OPTIONS
@@ -225,7 +201,7 @@ def main():
             key="exercise-analysis",
             mode=WebRtcMode.SENDRECV,
             video_processor_factory=VideoProcessorClass,
-            rtc_configuration={"iceServers": get_ice_servers()},
+            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
             media_stream_constraints={
                 "video": True,
                 "audio": False
