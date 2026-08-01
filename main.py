@@ -22,7 +22,7 @@ def get_ice_servers():
         )
         return [{"urls": ["stun:stun.l.google.com:19302"]}]
 
-    url = f"https://{app_name}.metered.live/api/v1/turn/credentials?apiKey={api_key}"
+    url = f"https://{app_name}.metered.live/api/v1/turn/credentials?secretKey={api_key}"
     response = requests.get(url, timeout=10)
     response.raise_for_status()
     return response.json()
