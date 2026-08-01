@@ -1,18 +1,8 @@
 import sqlite3
-import shutil
-import tempfile
-import os
 import streamlit as st
 from pathlib import Path
 
-_SEED_DB_PATH = Path(__file__).parent.parent.parent / "data.db"
-_DB_PATH = str(Path(tempfile.gettempdir()) / "ai_gym_trainer_data.db")
-
-if not Path(_DB_PATH).exists() and _SEED_DB_PATH.exists():
-    shutil.copyfile(_SEED_DB_PATH, _DB_PATH)
-
-if Path(_DB_PATH).exists():
-    os.chmod(_DB_PATH, 0o666)
+_DB_PATH = str(Path(__file__).parent.parent.parent / "data.db")
 
 
 @st.cache_resource
